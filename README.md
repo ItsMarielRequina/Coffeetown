@@ -77,16 +77,16 @@ CoffeeTown is a comprehensive coffee shop management system designed to handle i
 ## Screenshots
 
 ### Dashboard
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](public/images/screenshots/dashboard.png)
 
 ### Sales Management
-![Products](screenshots/sales.png)
+![Sales](public/images/screenshots/sales.png)
 
 ### Order Processing
-![Orders](screenshots/receipt.png)
+![Receipt](public/images/screenshots/receipt.png)
 
 ### Reports
-![Reports](screenshots/reports.png)
+![Reports](public/images/screenshots/reports.png)
 
 ## Database Schema
 
