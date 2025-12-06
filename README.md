@@ -215,15 +215,15 @@ Open your browser and navigate to:
 *Main dashboard showing sales overview, recent orders, and key metrics with easy navigation*
 
 ### Sales Management
-![Sales](/publicscreenshots/sales.png)
+![Sales](/public/screenshots/sales.png)
 *Point of sale interface for processing customer orders with product selection and shopping cart*
 
 ### Order Processing & Receipt
-![Receipt](/publicscreenshots/receipt.png)
+![Receipt](/public/screenshots/receipt.png)
 *Digital receipt generation displaying order details, items purchased, and payment information*
 
 ### Reports
-![Reports](/publicscreenshots/reports.png)
+![Reports](/public/screenshots/reports.png)
 *Comprehensive reporting interface with sales analytics, financial summaries, and inventory insights*
 
 ---
