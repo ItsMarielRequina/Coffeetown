@@ -1,0 +1,387 @@
+-- =============================================
+-- SQL Server Migration Script
+-- Coffee Town Database
+-- Converted from MySQL to SQL Server
+-- =============================================
+
+-- Create Database
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'coffee_town')
+BEGIN
+    CREATE DATABASE coffee_town;
+END
+GO
+
+USE coffee_town;
+GO
+
+-- =============================================
+-- Drop existing tables if they exist (in correct order due to foreign keys)
+-- =============================================
+IF OBJECT_ID('transactions', 'U') IS NOT NULL DROP TABLE transactions;
+IF OBJECT_ID('receipts', 'U') IS NOT NULL DROP TABLE receipts;
+IF OBJECT_ID('purchases', 'U') IS NOT NULL DROP TABLE purchases;
+IF OBJECT_ID('expenses', 'U') IS NOT NULL DROP TABLE expenses;
+IF OBJECT_ID('suppliers', 'U') IS NOT NULL DROP TABLE suppliers;
+IF OBJECT_ID('inventory', 'U') IS NOT NULL DROP TABLE inventory;
+IF OBJECT_ID('products', 'U') IS NOT NULL DROP TABLE products;
+IF OBJECT_ID('payment', 'U') IS NOT NULL DROP TABLE payment;
+IF OBJECT_ID('customers', 'U') IS NOT NULL DROP TABLE customers;
+IF OBJECT_ID('cart', 'U') IS NOT NULL DROP TABLE cart;
+IF OBJECT_ID('categorized_expenses', 'U') IS NOT NULL DROP TABLE categorized_expenses;
+IF OBJECT_ID('categorized_purchases', 'U') IS NOT NULL DROP TABLE categorized_purchases;
+IF OBJECT_ID('financial_summary', 'U') IS NOT NULL DROP TABLE financial_summary;
+IF OBJECT_ID('login_logs', 'U') IS NOT NULL DROP TABLE login_logs;
+IF OBJECT_ID('staff', 'U') IS NOT NULL DROP TABLE staff;
+IF OBJECT_ID('store', 'U') IS NOT NULL DROP TABLE store;
+IF OBJECT_ID('total_expense', 'U') IS NOT NULL DROP TABLE total_expense;
+IF OBJECT_ID('total_income', 'U') IS NOT NULL DROP TABLE total_income;
+GO
+
+-- =============================================
+-- Create Tables
+-- =============================================
+
+-- Table: staff
+CREATE TABLE staff (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Table: customers
+CREATE TABLE customers (
+    customerID INT IDENTITY(1,1) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    contact_number VARCHAR(15) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Table: cart
+CREATE TABLE cart (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    customer_id INT NULL,
+    item_name VARCHAR(255) NULL,
+    quantity INT NULL,
+    price DECIMAL(10,2) NULL,
+    added_at DATETIME DEFAULT GETDATE()
+);
+GO
+
+-- Table: categorized_expenses
+CREATE TABLE categorized_expenses (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    category VARCHAR(50) NULL,
+    total_cost DECIMAL(10,2) NULL,
+    order_date DATE NULL
+);
+GO
+
+-- Table: categorized_purchases
+CREATE TABLE categorized_purchases (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    category VARCHAR(50) NULL,
+    total_amount DECIMAL(10,2) NULL,
+    purchase_date DATE NULL
+);
+GO
+
+-- Table: financial_summary
+CREATE TABLE financial_summary (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    summary_date DATE NOT NULL,
+    category VARCHAR(20) NOT NULL CHECK (category IN ('daily', 'weekly', 'monthly', 'yearly')),
+    summary_name VARCHAR(50) NOT NULL,
+    total_sales DECIMAL(10,2) NOT NULL,
+    total_expenses DECIMAL(10,2) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Table: products
+CREATE TABLE products (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    product_name VARCHAR(255) NULL,
+    price DECIMAL(10,2) NULL,
+    type VARCHAR(50) NULL,
+    description VARCHAR(255) NULL,
+    images VARCHAR(255) NULL,
+    quantity INT NULL
+);
+GO
+
+-- Table: inventory
+CREATE TABLE inventory (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    product_name VARCHAR(100) NOT NULL,
+    raw_material_cost DECIMAL(10,2) NOT NULL,
+    labor_cost DECIMAL(10,2) NOT NULL,
+    overhead_cost DECIMAL(10,2) NOT NULL,
+    packaging_cost DECIMAL(10,2) NOT NULL,
+    total_cost AS (raw_material_cost + labor_cost + overhead_cost + packaging_cost) PERSISTED,
+    price DECIMAL(10,2) NOT NULL,
+    quantity INT DEFAULT 50,
+    stock_supply INT DEFAULT 100,
+    supplier_id INT NULL,
+    is_new BIT DEFAULT 0
+);
+GO
+
+-- Table: suppliers
+CREATE TABLE suppliers (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    product_id INT NOT NULL,
+    supplier_name VARCHAR(100) NOT NULL,
+    stock_supply INT DEFAULT 100,
+    CONSTRAINT FK_suppliers_inventory FOREIGN KEY (product_id) 
+        REFERENCES inventory(id) ON DELETE CASCADE
+);
+GO
+
+-- Table: expenses
+CREATE TABLE expenses (
+    product_id INT NOT NULL,
+    order_quantity INT NOT NULL,
+    total_cost DECIMAL(10,2) NOT NULL,
+    order_date DATETIME NOT NULL DEFAULT GETDATE(),
+    id INT NULL,
+    supplier_id INT NULL
+);
+GO
+
+-- Table: purchases
+CREATE TABLE purchases (
+    purchaseID INT IDENTITY(1,1) PRIMARY KEY,
+    customerID INT NOT NULL,
+    item_name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL,
+    purchase_date DATETIME DEFAULT GETDATE(),
+    price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL
+);
+GO
+
+-- Table: payment
+CREATE TABLE payment (
+    paymentID INT IDENTITY(1,1) PRIMARY KEY,
+    amount_pay DECIMAL(10,2) NOT NULL,
+    paymentDate DATE NOT NULL,
+    purchaseID INT NULL,
+    CONSTRAINT FK_payment_purchases FOREIGN KEY (purchaseID) 
+        REFERENCES purchases(purchaseID)
+);
+GO
+
+-- Table: receipts
+CREATE TABLE receipts (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    customerID INT NOT NULL,
+    item_name VARCHAR(255) NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    order_date DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_receipts_customers FOREIGN KEY (customerID) 
+        REFERENCES customers(customerID)
+);
+GO
+
+-- Table: login_logs
+CREATE TABLE login_logs (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id INT NOT NULL,
+    login_time DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_login_logs_staff FOREIGN KEY (user_id) 
+        REFERENCES staff(id)
+);
+GO
+
+-- Table: store
+CREATE TABLE store (
+    storeID INT IDENTITY(1,1) PRIMARY KEY,
+    name_store VARCHAR(200) NOT NULL,
+    location_store VARCHAR(200) NOT NULL,
+    contactNo VARCHAR(15) NULL,
+    opening_hours VARCHAR(100) NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE(),
+    updated_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Table: total_expense
+CREATE TABLE total_expense (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    expenses DECIMAL(10,2) NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Table: total_income
+CREATE TABLE total_income (
+    id INT IDENTITY(1,1) PRIMARY KEY,
+    income DECIMAL(10,2) NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- Table: transactions
+CREATE TABLE transactions (
+    transaction_id INT IDENTITY(1,1) PRIMARY KEY,
+    customerID INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    date DATETIME DEFAULT GETDATE(),
+    CONSTRAINT FK_transactions_customers FOREIGN KEY (customerID) 
+        REFERENCES customers(customerID) ON DELETE CASCADE
+);
+GO
+
+-- =============================================
+-- Create Triggers
+-- =============================================
+
+-- Trigger: update_inventory_supplier (After INSERT on expenses)
+CREATE TRIGGER trg_update_inventory_supplier
+ON expenses
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    -- Update inventory quantity and stock_supply
+    UPDATE i
+    SET quantity = i.quantity + ins.order_quantity,
+        stock_supply = i.stock_supply - ins.order_quantity
+    FROM inventory i
+    INNER JOIN inserted ins ON i.id = ins.product_id;
+    
+    -- Update suppliers stock_supply
+    UPDATE s
+    SET stock_supply = s.stock_supply - ins.order_quantity
+    FROM suppliers s
+    INNER JOIN inserted ins ON s.id = (
+        SELECT supplier_id FROM inventory WHERE id = ins.product_id
+    );
+END;
+GO
+
+-- Trigger: deduct_inventory_quantity (After INSERT on purchases)
+CREATE TRIGGER trg_deduct_inventory_quantity
+ON purchases
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    
+    UPDATE inventory
+    SET inventory.quantity = inventory.quantity - ins.quantity
+    FROM inventory
+    INNER JOIN inserted ins ON inventory.id = ins.purchaseID;
+END;
+GO
+
+-- =============================================
+-- Insert Sample Data
+-- =============================================
+
+-- Insert staff data
+SET IDENTITY_INSERT staff ON;
+INSERT INTO staff (id, username, email, password, created_at) VALUES
+(15, 'meljay', 'sayaw@gmail.com', '$2y$10$eUreSCIFc5YSc01mbFFKLuWmy/GlKACtrT32aZvlDF7SAtUVAUVga', '2024-10-20 03:08:05'),
+(16, 'mariel', 'mari@gmail.com', '$2y$10$9Uu/nLhKC4399Z7dLl8Tue2/DJ94YfgdZuWYTa5Dkl4y7dyLd3lvi', '2024-11-16 00:43:01'),
+(17, 'mariel123', 'marie@gmail.com', '$2y$10$64laqTN3A1Pzf8NhlTjMA.abbolIdw9AiaK1u/.2Dg6hT1ZOxDh.O', '2024-11-17 13:56:24'),
+(18, 'marielrequina', 'mr@gmail.com', '$2y$10$JEDmPtjCLl50RHavcwKd4.SOcWomH45T852tW8dP.XKUnH2TyPKEy', '2024-11-26 03:06:11');
+SET IDENTITY_INSERT staff OFF;
+GO
+
+-- Insert products data
+SET IDENTITY_INSERT products ON;
+INSERT INTO products (id, product_name, price, type, description, images, quantity) VALUES
+(1, 'Classic Milk Tea', 100.00, 'milktea', NULL, 'images/milk_tea.jpg', NULL),
+(2, 'Brown Sugar Milk Tea', 120.00, 'milktea', NULL, 'images/brown_sugar_milk_tea.jpg', NULL),
+(3, 'Taro Milk Tea', 110.00, 'milktea', NULL, 'images/taro_milk_tea.jpg', NULL),
+(4, 'Wintermelon Milk Tea', 115.00, 'milktea', NULL, 'images/wintermelon_milk_tea.jpg', NULL),
+(5, 'Matcha Milk Tea', 130.00, 'milktea', NULL, 'images/matcha_milk_tea.jpg', NULL),
+(6, 'Okinawa Milk Tea', 125.00, 'milktea', NULL, 'images/okinawa_milk_tea.jpg', NULL),
+(7, 'Hokkaido Milk Tea', 120.00, 'milktea', NULL, 'images/hokkaido_milk_tea.jpg', NULL),
+(8, 'Thai Milk Tea', 110.00, 'milktea', NULL, 'images/thai_milk_tea.jpg', NULL),
+(9, 'Chocolate Milk Tea', 105.00, 'milktea', NULL, 'images/chocolate_milk_tea.jpg', NULL),
+(10, 'Jasmine Milk Tea', 115.00, 'milktea', NULL, 'images/jasmine_milk_tea.jpg', NULL),
+(11, 'Espresso', 80.00, 'coffee', NULL, 'images/espresso.jpg', NULL),
+(12, 'Americano', 90.00, 'coffee', NULL, 'images/americano.jpg', NULL),
+(13, 'Cappuccino', 120.00, 'coffee', NULL, 'images/cappuccino.jpg', NULL),
+(14, 'Latte', 130.00, 'coffee', NULL, 'images/latte.jpg', NULL),
+(15, 'Mocha', 140.00, 'coffee', NULL, 'images/mocha.jpg', NULL),
+(16, 'Macchiato', 135.00, 'coffee', NULL, 'images/macchiato.jpg', NULL),
+(17, 'Caramel Latte', 145.00, 'coffee', NULL, 'images/caramel_latte.jpg', NULL),
+(18, 'Flat White', 125.00, 'coffee', NULL, 'images/flat_white.jpg', NULL);
+SET IDENTITY_INSERT products OFF;
+GO
+
+-- Insert inventory data
+SET IDENTITY_INSERT inventory ON;
+INSERT INTO inventory (id, product_name, raw_material_cost, labor_cost, overhead_cost, packaging_cost, price, quantity, stock_supply, supplier_id, is_new) VALUES
+(1, 'Classic Milk Tea', 30.00, 10.00, 5.00, 2.00, 100.00, 10, 100, NULL, 0),
+(2, 'Brown Sugar Milk Tea', 35.00, 10.00, 5.00, 2.00, 120.00, 111, 100, NULL, 0),
+(3, 'Taro Milk Tea', 32.00, 10.00, 5.00, 2.00, 110.00, 101, 100, NULL, 0),
+(4, 'Wintermelon Milk Tea', 34.00, 10.00, 5.00, 2.00, 115.00, 100, 100, NULL, 0),
+(5, 'Matcha Milk Tea', 38.00, 10.00, 5.00, 2.00, 130.00, 50, 100, NULL, 0),
+(6, 'Okinawa Milk Tea', 36.00, 10.00, 5.00, 2.00, 125.00, 50, 100, NULL, 0),
+(7, 'Hokkaido Milk Tea', 35.00, 10.00, 5.00, 2.00, 120.00, 50, 100, NULL, 0),
+(8, 'Thai Milk Tea', 32.00, 10.00, 5.00, 2.00, 110.00, 50, 100, NULL, 0),
+(9, 'Chocolate Milk Tea', 31.00, 10.00, 5.00, 2.00, 105.00, 50, 100, NULL, 0),
+(10, 'Jasmine Milk Tea', 34.00, 10.00, 5.00, 2.00, 115.00, 50, 100, NULL, 0),
+(11, 'Espresso', 20.00, 10.00, 5.00, 1.00, 80.00, 45, 100, NULL, 0),
+(12, 'Americano', 18.00, 10.00, 5.00, 1.00, 90.00, 49, 100, NULL, 0),
+(13, 'Cappuccino', 30.00, 10.00, 5.00, 2.00, 120.00, 41, 100, NULL, 0),
+(14, 'Latte', 30.00, 10.00, 5.00, 2.00, 130.00, 46, 100, NULL, 0),
+(15, 'Mocha', 35.00, 10.00, 5.00, 2.00, 140.00, 50, 100, NULL, 0),
+(16, 'Macchiato', 33.00, 10.00, 5.00, 2.00, 135.00, 50, 100, NULL, 0),
+(17, 'Caramel Latte', 37.00, 10.00, 5.00, 2.00, 145.00, 50, 100, NULL, 0),
+(18, 'Flat White', 34.00, 10.00, 5.00, 2.00, 125.00, 51, 100, NULL, 0);
+SET IDENTITY_INSERT inventory OFF;
+GO
+
+-- Insert suppliers data
+SET IDENTITY_INSERT suppliers ON;
+INSERT INTO suppliers (id, product_id, supplier_name, stock_supply) VALUES
+(1, 1, 'Supplier A', -1954),
+(2, 2, 'Supplier B', 72),
+(3, 3, 'Supplier C', 76),
+(4, 4, 'Supplier D', 100),
+(5, 5, 'Supplier E', 100),
+(6, 6, 'Supplier F', 100),
+(7, 7, 'Supplier G', 100),
+(8, 8, 'Supplier H', 100),
+(9, 9, 'Supplier I', 100),
+(10, 10, 'Supplier J', 100),
+(11, 11, 'Supplier K', 100),
+(12, 12, 'Supplier L', 100),
+(13, 13, 'Supplier M', 100),
+(14, 14, 'Supplier N', 100),
+(15, 15, 'Supplier O', 100),
+(16, 16, 'Supplier P', 100),
+(17, 17, 'Supplier Q', 100),
+(18, 18, 'Supplier R', 100);
+SET IDENTITY_INSERT suppliers OFF;
+GO
+
+-- =============================================
+-- Verification Queries
+-- =============================================
+
+-- Check table counts
+SELECT 'staff' AS TableName, COUNT(*) AS RecordCount FROM staff
+UNION ALL
+SELECT 'products', COUNT(*) FROM products
+UNION ALL
+SELECT 'inventory', COUNT(*) FROM inventory
+UNION ALL
+SELECT 'suppliers', COUNT(*) FROM suppliers;
+GO
+
+PRINT 'Database coffee_town created successfully!';
+PRINT 'All tables, triggers, and sample data have been imported.';
+GO
