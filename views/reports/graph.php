@@ -2,11 +2,11 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Function to categorize purchases
 function getCategorizedPurchases() {
@@ -164,6 +164,7 @@ saveFinancialSummary();
     <title>Financial Summary - Graphs</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Coffeetown/public/css/styles.css">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -248,7 +249,7 @@ saveFinancialSummary();
 
 <div class="container">
     <!-- Back Button -->
-    <a href="transaction.php" class="back-button">Back to Transactions</a>
+    <a href="/Coffeetown/views/reports/financial_summary.php" class="back-button">View Detailed Report</a>
 
     <!-- Charts Section -->
     <div class="chart-section">

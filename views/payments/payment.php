@@ -1,6 +1,13 @@
 <?php
 session_start();
-include 'db.php'; // Include your db.php file
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /Coffeetown/views/auth/login.php');
+    exit;
+}
+
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Collect selected product IDs and their quantities
@@ -36,10 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         unset($_SESSION['cart']);
 
         // Redirect to the view_sales.php page after successful payment
-        header("Location: view_sales.php");
-        exit();
+        header("Location: /Coffeetown/views/reports/view_sales.php");
+        exit;
     } else {
-        echo "Please fill in all the required fields.";
+        // Redirect back to the previous page with an error message
+        $_SESSION['error'] = "Please fill in all the required fields.";
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        exit;
     }
 } else {
     echo "Invalid request method.";

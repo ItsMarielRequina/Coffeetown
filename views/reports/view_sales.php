@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Fetch all customers
 $stmt = $pdo->prepare("SELECT DISTINCT customerID, name, contact_number, created_at FROM customers ORDER BY created_at DESC");
@@ -38,6 +38,7 @@ foreach ($customers as $customer) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Records - Coffee Town POS</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Coffeetown/public/css/styles.css">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -173,7 +174,7 @@ foreach ($customers as $customer) {
                     <td><?php echo htmlspecialchars($customer['contact_number']); ?></td>
                     <td>₱<?php echo number_format($customerTotals[$customer['customerID']], 2); ?></td> <!-- Display Total Amount from $customerTotals -->
                     <td><?php echo date('F j, Y, g:i a', strtotime($customer['created_at'])); ?></td>
-                    <td><a href="customer_purchase.php?id=<?php echo $customer['customerID']; ?>" class="view-details">View Details</a></td>
+                    <td><a href="/Coffeetown/views/orders/customer_purchase.php?id=<?php echo $customer['customerID']; ?>" class="view-purchases">View Purchases</a></td>
                 </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -182,7 +183,7 @@ foreach ($customers as $customer) {
 
     <!-- Fixed Bottom Navigation -->
     <div class="sidenav">
-    <a href="index.php">🏠 Home</a>
+            <a href="/Coffeetown/public/index.php" class="back-button">Back to Dashboard</a>
         <a href="expenses.php">🧾 Expenses</a>
         <a href="inventory.php">📦 Inventory</a>
         <a href="supplier.php">👤 Supplier</a>

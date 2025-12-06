@@ -1,66 +1,161 @@
 <?php
 session_start();
-include 'db.php'; // Include your database connection
+header('Content-Type: application/json');
+require_once __DIR__ . '/../config/db.php';
 
-if (!isset($_SESSION['customer_id'])) {
-    header('Location: login.php'); // Redirect if no customer ID is found
-    exit;
-}
+try {
+    // Check if user is authenticated
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception('User not authenticated');
+    }
 
-// Get the customer ID
-$customer_id = $_SESSION['customer_id'];
+    // Get and validate input data
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    if (!$data || !isset($data['order_id']) || !isset($data['items'])) {
+        throw new Exception('Invalid request data');
+    }
 
-// Assuming purchases come from a POST request (from a form)
-$purchases = $_POST['purchases']; // This should be an array of purchases
+    $order_id = filter_var($data['order_id'], FILTER_VALIDATE_INT);
+    $user_id = $_SESSION['user_id'];
+    
+    if ($order_id === false) {
+        throw new Exception('Invalid order ID');
+    }
 
-if (!empty($purchases) && is_array($purchases)) {
+    // Begin transaction
+    $pdo->beginTransaction();
+
     try {
-        // Begin a transaction
-        $pdo->beginTransaction();
-
-        // Prepare statement to save receipt
-        $stmt = $pdo->prepare("
-            INSERT INTO receipts (customerID, item_name, quantity, price, total_amount)
-            VALUES (:customerID, :item_name, :quantity, :price, :total_amount)
+        // Prepare receipt header
+        $receiptStmt = $pdo->prepare("
+            INSERT INTO receipts (
+                order_id, 
+                user_id, 
+                total_amount, 
+                payment_method, 
+                receipt_date, 
+                created_at
+            ) 
+            SELECT 
+                o.id,
+                :user_id,
+                o.total_amount,
+                o.payment_method,
+                NOW(),
+                NOW()
+            FROM orders o
+            WHERE o.id = :order_id
+            AND o.customer_id = :user_id
         ");
 
-        // Loop through each purchase item and save it
-        foreach ($purchases as $purchase) {
-            // Validate input (ensure all required keys are present)
-            if (
-                isset($purchase['item_name'], $purchase['quantity'], $purchase['price'], $purchase['total_amount']) &&
-                is_numeric($purchase['quantity']) && 
-                is_numeric($purchase['price']) && 
-                is_numeric($purchase['total_amount'])
-            ) {
-                // Execute the insert statement
-                $stmt->execute([
-                    'customerID' => $customer_id,
-                    'item_name' => $purchase['item_name'],
-                    'quantity' => (int)$purchase['quantity'], // Cast to int
-                    'price' => (float)$purchase['price'],     // Cast to float
-                    'total_amount' => (float)$purchase['total_amount'] // Cast to float
-                ]);
-            } else {
-                // Handle missing or invalid data
-                throw new Exception("Invalid purchase data.");
-            }
+        $receiptStmt->execute([
+            ':user_id' => $user_id,
+            ':order_id' => $order_id
+        ]);
+
+        $receipt_id = $pdo->lastInsertId();
+
+        if (!$receipt_id) {
+            throw new Exception('Failed to create receipt header');
         }
 
-        // Commit the transaction
+        // Prepare receipt items statement
+        $itemStmt = $pdo->prepare("
+            INSERT INTO receipt_items (
+                receipt_id,
+                product_id,
+                product_name,
+                quantity,
+                unit_price,
+                total_price
+            )
+            SELECT 
+                :receipt_id,
+                oi.product_id,
+                p.product_name,
+                oi.quantity,
+                oi.price_per_unit,
+                oi.total_price
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            WHERE oi.order_id = :order_id
+        ");
+
+        $itemStmt->execute([
+            ':receipt_id' => $receipt_id,
+            ':order_id' => $order_id
+        ]);
+
+        // Update order status to indicate receipt was generated
+        $updateOrderStmt = $pdo->prepare("
+            UPDATE orders 
+            SET status = 'completed', 
+                receipt_generated = 1,
+                updated_at = NOW()
+            WHERE id = :order_id
+            AND customer_id = :user_id
+        ");
+
+        $updateOrderStmt->execute([
+            ':order_id' => $order_id,
+            ':user_id' => $user_id
+        ]);
+
+        // Commit transaction
         $pdo->commit();
 
-        // After saving, redirect to the transaction page
-        header('Location: transaction.php'); // Redirect to view the receipts
-        exit;
+        // Get the complete receipt data
+        $receiptData = $pdo->prepare("
+            SELECT 
+                r.id as receipt_id,
+                r.order_id,
+                r.receipt_date,
+                r.total_amount,
+                r.payment_method,
+                (
+                    SELECT JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'product_id', ri.product_id,
+                            'product_name', ri.product_name,
+                            'quantity', ri.quantity,
+                            'unit_price', ri.unit_price,
+                            'total_price', ri.total_price
+                        )
+                    )
+                    FROM receipt_items ri
+                    WHERE ri.receipt_id = r.id
+                ) as items
+            FROM receipts r
+            WHERE r.id = :receipt_id
+            AND r.user_id = :user_id
+        ");
+
+        $receiptData->execute([
+            ':receipt_id' => $receipt_id,
+            ':user_id' => $user_id
+        ]);
+
+        $receipt = $receiptData->fetch(PDO::FETCH_ASSOC);
+        $receipt['items'] = json_decode($receipt['items'], true);
+
+        // Return success response
+        echo json_encode([
+            'success' => true,
+            'message' => 'Receipt generated successfully',
+            'receipt' => $receipt
+        ]);
 
     } catch (Exception $e) {
-        // Rollback the transaction in case of error
         $pdo->rollBack();
-        // Log error or display message
-        echo "Failed to record receipts: " . htmlspecialchars($e->getMessage());
+        throw $e;
     }
-} else {
-    echo "No purchases found.";
+
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Failed to generate receipt: ' . $e->getMessage()
+    ]);
 }
 ?>

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Handle login form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("INSERT INTO login_logs (user_id) VALUES (:user_id)");
         $stmt->execute(['user_id' => $user['id']]);
 
-        header("Location: index.php"); // Redirect to the main page
+        header("Location: /Coffeetown/public/index.php"); // Redirect to the main page
         exit;
     } else {
         $error = "Invalid username or password!";
@@ -30,11 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/Coffeetown/public/images/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Coffee Town</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Coffeetown/public/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
@@ -194,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" name="username" placeholder="Username" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
-            <a href="signup.php" class="link">Don't have an account? Sign up</a>
+            <a href="/Coffeetown/views/auth/signup.php" class="link">Don't have an account? Sign up</a>
         </form>
     </div>
 </body>

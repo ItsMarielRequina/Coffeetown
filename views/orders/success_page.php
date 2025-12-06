@@ -1,3 +1,12 @@
+<?php
+session_start();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /Coffeetown/views/auth/login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -109,17 +118,17 @@
 
 <div class="success-container">
     <h1 class="success-message">Product added successfully!</h1>
-    <a href="index.php" class="back-link">Add another product</a>
+    <a href="/Coffeetown/public/index.php" class="back-link">Back to Dashboard</a>
 </div>
 
 <!-- Navbar below the success message -->
 <div class="sidenav">
-    <a href="index.php">🏠 Home</a>
-    <a href="view_sales.php">💰 Sales</a>
-    <a href="expenses.php">🧾 Expenses</a>
-    <a href="inventory.php">📦 Inventory</a>
-    <a href="transaction.php">🔄 Transaction</a>
-    <a href="logout.php">🚪 Logout</a>
+    <a href="/Coffeetown/public/index.php">🏠 Home</a>
+    <a href="/Coffeetown/views/reports/view_sales.php">💰 Sales</a>
+    <a href="/Coffeetown/views/expenses/expenses.php">🧾 Expenses</a>
+    <a href="/Coffeetown/views/inventory/inventory.php">📦 Inventory</a>
+    <a href="/Coffeetown/views/transactions/transaction.php">🔄 Transaction</a>
+    <a href="/Coffeetown/controllers/logout.php">🚪 Logout</a>
 </div>
 
 </body>

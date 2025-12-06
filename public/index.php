@@ -4,11 +4,11 @@ error_reporting(E_ALL);
 
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../config/db.php'; // Include database connection
 
 // Handle the product addition
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add_product'])) {
@@ -201,13 +201,14 @@ $milkTeaProducts = getProducts('milktea', $searchQuery);
 <html lang="en">
 
 <head>
-    <link rel="icon" href="images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/Coffeetown/public/images/favicon.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-mQ93WB5K/sswH6CpvcC/taeO1pSHfGRp5W8FfGjphB5fgCiNSkGe9RlgI9mOr+2z" crossorigin="anonymous">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="C:\xampp\htdocs\favicon">
+    <link rel="icon" href="/Coffeetown/public/images/favicon.ico">
     <title>Coffee Town POS</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/Coffeetown/public/css/styles.css">
     <style>
                 /* Global Styles */
         body {
@@ -690,12 +691,13 @@ $milkTeaProducts = getProducts('milktea', $searchQuery);
 
                 <!-- Sidebar Navigation -->
                 <div class="sidenav">
-                    <a href="view_sales.php">💰 Sales</a>
-                    <a href="expenses.php">🧾 Expenses</a>
-                    <a href="inventory.php">📦 Inventory</a>
-                    <a href="supplier.php">👤 Supplier</a>
-                    <a href="transaction.php">🔄 Transaction</a>
-                    <a href="logout.php">🚪 Logout</a>
+                    <a href="/Coffeetown/views/orders/order.php">💰 Sales</a>
+                    <a href="/Coffeetown/views/orders/order.php">Orders</a>
+                    <a href="/Coffeetown/views/inventory/inventory.php">Inventory</a>
+                    <a href="/Coffeetown/views/suppliers/supplier.php">Suppliers</a>
+                    <a href="/Coffeetown/views/transaction/transaction.php">🔄 Transaction</a>
+                    <a href="/Coffeetown/public/index.php">Home</a>
+                    <a href="/Coffeetown/public/logout.php">🚪 Logout</a>
                 </div>
             </div>
 

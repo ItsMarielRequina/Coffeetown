@@ -1,5 +1,12 @@
 <?php
-include 'db.php';
+session_start();
+require_once __DIR__ . '/../config/db.php'; // Include database connection
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /Coffeetown/views/auth/login.php');
+    exit;
+}
 
 if (isset($_POST['delete_product'])) {
     $productName = $_POST['product_name_delete'];
@@ -38,7 +45,7 @@ if (isset($_POST['delete_product'])) {
             $pdo->commit();
 
             // Redirect back to the products page after deletion
-            header('Location: index.php');
+            header('Location: /Coffeetown/public/index.php');
             exit;
         } else {
             echo "Product not found.";

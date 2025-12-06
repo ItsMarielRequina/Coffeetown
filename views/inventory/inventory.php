@@ -2,11 +2,11 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Function to fetch all products from the inventory table
 function getAllProducts() {
@@ -132,12 +132,12 @@ if (isset($_SESSION['flash_message'])) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/Coffeetown/public/images/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory - Coffee Town</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/Coffeetown/public/css/styles.css">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -355,13 +355,14 @@ if (isset($_SESSION['flash_message'])) {
 
     <!-- Bottom Navigation -->
     <div class="sidenav">
-        <a href="index.php">🏠 Home</a>
-        <a href="view_sales.php">💰 Sales</a>
-        <a href="expenses.php">🧾 Expenses</a>
-        <a href="supplier.php">👤 Supplier</a>
-        <a href="transaction.php"> Transaction</a>
-        <a href="logout.php">🚪 Logout</a>
+        <a href="/Coffeetown/public/index.php">Home</a>
+        <a href="/Coffeetown/views/sales/view_sales.php">Sales</a>
+        <a href="/Coffeetown/views/expenses/expenses.php">Expenses</a>
+        <a href="/Coffeetown/views/suppliers/supplier.php">Suppliers</a>
+        <a href="/Coffeetown/views/transactions/transaction.php">Transaction</a>
+        <a href="/Coffeetown/views/auth/logout.php">Logout</a>
     </div>
+    <script src="/Coffeetown/public/js/script.js"></script>
     <script>
         // Get modal element
         const modal = document.getElementById("myModal");

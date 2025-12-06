@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['user_id'] = $user_id;
 
     // Redirect to login.php after successful signup
-    header("Location: login.php");
+    header("Location: /Coffeetown/views/auth/login.php");
     exit;
 }
 ?>
@@ -43,12 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+<link rel="icon" href="/Coffeetown/public/images/favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Coffee Town</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/Coffeetown/public/css/styles.css">
     <style>
         * {
             margin: 0;
@@ -175,12 +175,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if (isset($_GET['error'])): ?>
             <p class="error"><?php echo htmlspecialchars($_GET['error']); ?></p>
         <?php endif; ?>
-        <form action="signup_process.php" method="POST">
+        <form action="/Coffeetown/views/auth/signup_process.php" method="POST">
             <input type="text" name="username" placeholder="Username" required>
             <input type="email" name="email" placeholder="Email" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Sign Up</button>
-            <a href="login.php" class="link">Already have an account? Login</a>
+            <a href="/Coffeetown/views/auth/login.php" class="link">Already have an account? Login</a>
         </form>
     </div>
 </body>

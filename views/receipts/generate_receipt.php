@@ -1,9 +1,9 @@
 <?php
 session_start();
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 if (!isset($_SESSION['customer_id'])) {
-    header('Location: login.php'); // Redirect if no customer ID is found
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect if no customer ID is found
     exit;
 }
 
@@ -225,8 +225,8 @@ $purchases = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="button-container">
             <button class="button" onclick="window.print();">Print Receipt</button>
-            <a href="view_sales.php">View Sales</a>
-            <a href="index.php">Home</a>
+            <a href="/Coffeetown/views/sales/view_sales.php">View Sales</a>
+            <a href="/Coffeetown/public/index.php" class="print-button">Back to Home</a>
         </div>
 
         <p class="thank-you">Thank you for choosing Coffee Town!</p>

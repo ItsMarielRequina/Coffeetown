@@ -2,8 +2,8 @@
 session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add') {
-    // Assuming you have a database connection established
-    include 'db.php'; // Make sure to include your database connection
+    // Database connection
+    require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
     $name = $_POST['name'];
     $address = $_POST['address'];

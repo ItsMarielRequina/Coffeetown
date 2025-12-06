@@ -1,11 +1,11 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../config/db.php'; // Include database connection
 
 // Function to fetch total income from all purchases
 function getTotalIncomeFromAllPurchases() {

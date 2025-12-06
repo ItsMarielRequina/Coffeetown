@@ -2,11 +2,11 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 function replenishStock($productId, $quantity) {
     global $pdo;
@@ -54,6 +54,7 @@ $products = getProductsWithSuppliers();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suppliers - Coffee Town</title>
+    <link rel="icon" href="/Coffeetown/public/images/favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -185,13 +186,14 @@ $products = getProductsWithSuppliers();
         </table>
     </div>
     <div class="sidenav">
-        <a href="index.php">🏠 Home</a>
-        <a href="view_sales.php">💰 Sales</a>
-        <a href="expenses.php">🧾 Expenses</a>
-        <a href="inventory.php">📦 Inventory</a>
-        <a href="transaction.php">🔄 Transaction</a>
-        <a href="logout.php">🚪 Logout</a>
+        <a href="/Coffeetown/public/index.php">Home</a>
+        <a href="/Coffeetown/views/sales/view_sales.php">💰 Sales</a>
+        <a href="/Coffeetown/views/suppliers/supplier.php">Suppliers</a>
+        <a href="/Coffeetown/views/inventory/inventory.php">Inventory</a>
+        <a href="/Coffeetown/views/transaction/transaction.php">🔄 Transaction</a>
+        <a href="/Coffeetown/views/auth/logout.php">🚪 Logout</a>
     </div>
+    <script src="/Coffeetown/public/js/script.js"></script>
     <script>
     function checkStockSupply() {
         const rows = document.querySelectorAll("tbody tr");

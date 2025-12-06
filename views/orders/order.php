@@ -2,11 +2,12 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'User not logged in.']);
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Get JSON input
 $data = json_decode(file_get_contents('php://input'), true);
@@ -15,6 +16,7 @@ $orderQuantity = $data['order_quantity'] ?? null;
 
 // Validate input
 if ($productId === null || $orderQuantity === null) {
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Invalid input.']);
     exit;
 }
@@ -26,6 +28,7 @@ $stmt->execute();
 $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$product) {
+    header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Product not found.']);
     exit;
 }

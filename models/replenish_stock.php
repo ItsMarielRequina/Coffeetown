@@ -1,7 +1,13 @@
 <?php
 session_start();
 
-include 'db.php'; // Include your database connection
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /Coffeetown/views/auth/login.php');
+    exit;
+}
+
+require_once __DIR__ . '/../config/db.php'; // Include database connection
 
 // Function to replenish stock supply
 function replenishStock() {

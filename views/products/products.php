@@ -1,16 +1,23 @@
 <?php
 session_start();
-include 'db.php'; // Include your database connection
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: /Coffeetown/views/auth/login.php');
+    exit;
+}
+
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Sample products data (could be fetched from the database)
 $products = [
-    ['id' => 1, 'name' => 'Classic Milk Tea', 'price' => 100.00, 'image' => 'images/milk_tea.jpg'],
-    ['id' => 2, 'name' => 'Brown Sugar Milk Tea', 'price' => 120.00, 'image' => 'images/brown_sugar_milk_tea.jpg'],
-    ['id' => 3, 'name' => 'Taro Milk Tea', 'price' => 110.00, 'image' => 'images/taro_milk_tea.jpg'],
-    ['id' => 4, 'name' => 'Wintermelon Milk Tea', 'price' => 115.00, 'image' => 'images/wintermelon_milk_tea.jpg'],
-    ['id' => 5, 'name' => 'Matcha Milk Tea', 'price' => 130.00, 'image' => 'images/matcha_milk_tea.jpg'],
-    ['id' => 11, 'name' => 'Espresso', 'price' => 80.00, 'image' => 'images/espresso.jpg'],
-    ['id' => 12, 'name' => 'Americano', 'price' => 90.00, 'image' => 'images/americano.jpg'],
+    ['id' => 1, 'name' => 'Classic Milk Tea', 'price' => 100.00, 'image' => '/Coffeetown/public/images/milk_tea.jpg'],
+    ['id' => 2, 'name' => 'Brown Sugar Milk Tea', 'price' => 120.00, 'image' => '/Coffeetown/public/images/brown_sugar_milk_tea.jpg'],
+    ['id' => 3, 'name' => 'Taro Milk Tea', 'price' => 110.00, 'image' => '/Coffeetown/public/images/taro_milk_tea.jpg'],
+    ['id' => 4, 'name' => 'Wintermelon Milk Tea', 'price' => 115.00, 'image' => '/Coffeetown/public/images/wintermelon_milk_tea.jpg'],
+    ['id' => 5, 'name' => 'Matcha Milk Tea', 'price' => 130.00, 'image' => '/Coffeetown/public/images/matcha_milk_tea.jpg'],
+    ['id' => 11, 'name' => 'Espresso', 'price' => 80.00, 'image' => '/Coffeetown/public/images/espresso.jpg'],
+    ['id' => 12, 'name' => 'Americano', 'price' => 90.00, 'image' => '/Coffeetown/public/images/americano.jpg'],
     // Add other products here
 ];
 ?>
@@ -62,11 +69,12 @@ $products = [
             <h2><?php echo htmlspecialchars($product['name']); ?></h2>
             <p>₱<?php echo number_format($product['price'], 2); ?></p>
             <form method="POST" action="cart.php" class="add-to-cart-form">
-                <input type="hidden" name="name" value="<?php echo htmlspecialchars($product['name']); ?>">
+                <a href="/Coffeetown/views/cart/view_cart.php" class="view-cart">View Cart (<?php echo isset($_SESSION['cart']) ? count($_SESSION['cart']) : 0; ?>)</a>
                 <input type="hidden" name="price" value="<?php echo $product['price']; ?>">
                 <input type="hidden" name="action" value="add">
                 <button type="submit">Add to Cart</button>
             </form>
+            <a href="/Coffeetown/controllers/add_to_cart.php?id=<?php echo $product['id']; ?>" class="add-to-cart">Add to Cart</a>
         </div>
     <?php endforeach; ?>
 </body>

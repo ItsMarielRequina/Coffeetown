@@ -1,6 +1,6 @@
 <?php
 session_start();
-include 'db.php'; // Include database connection
+require_once __DIR__ . '/../config/db.php'; // Include database connection
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username']);
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $_SESSION['user_id'] = $user_id;
 
     // Redirect to index.php after successful signup
-    header("Location: login.php");
+    header("Location: /Coffeetown/views/auth/login.php");
     exit;
 }
 ?>

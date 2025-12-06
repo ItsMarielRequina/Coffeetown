@@ -2,11 +2,11 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Define currency symbol as a constant
 define('CURRENCY_SYMBOL', '₱');
@@ -124,8 +124,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Update total expenses in total_expense table
     updateTotalExpenses($totalExpenses);
     
-    // Redirect or refresh page as needed
-    header('Location: expenses.php');
+    // Redirect or show success message
+    header('Location: /Coffeetown/views/transactions/transaction.php?success=1');
     exit;
 }
 

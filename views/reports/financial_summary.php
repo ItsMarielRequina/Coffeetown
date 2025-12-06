@@ -2,11 +2,11 @@
 session_start();
 
 if (!isset($_SESSION['user_id'])) {
-    header('Location: login.php'); // Redirect to login page if not logged in
+    header('Location: /Coffeetown/views/auth/login.php'); // Redirect to login page if not logged in
     exit;
 }
 
-include 'db.php'; // Include your database connection
+require_once __DIR__ . '/../../config/db.php'; // Include database connection
 
 // Function to categorize purchases
 function getCategorizedPurchases() {
@@ -68,6 +68,7 @@ $categorizedExpenses = getCategorizedExpenses();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Coffeetown/public/css/styles.css">
     <title>Financial Summary</title>
     <style>
         body {
@@ -182,10 +183,10 @@ $categorizedExpenses = getCategorizedExpenses();
 </header>
 
 <!-- Back Button -->
-<a href="transaction.php" class="back-button">Back to Transactions</a>
+<a href="/Coffeetown/views/transactions/transaction.php" class="back-button">Back to Transactions</a>
 
 <!-- View Graph Button -->
-<a href="graph.php" class="back-button">View Graph</a>
+<a href="/Coffeetown/views/graph.php" class="back-button">View Graph</a>
 
 <div class="summary">
     <h4>Purchases</h4>
