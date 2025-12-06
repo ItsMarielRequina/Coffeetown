@@ -211,7 +211,7 @@ Open your browser and navigate to:
 ## 📸 Screenshots
 
 ### Dashboard
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](/public/screenshots/dashboard.png)
 *Main dashboard showing sales overview, recent orders, and key metrics with easy navigation*
 
 ### Sales Management
